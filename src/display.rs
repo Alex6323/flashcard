@@ -5,6 +5,8 @@ use crossterm::{ClearType, Terminal, TerminalCursor, TerminalInput};
 use crossterm::{Color, Colored};
 use crossterm::{InputEvent, KeyEvent};
 
+use std::process;
+
 /// Represents a display to display flashcards.
 pub struct Display {
     terminal: Terminal,
@@ -59,10 +61,14 @@ impl Display {
                             chars.push(c);
                             self.print(c);
                         }
+                        KeyEvent::Ctrl(c) if c == 'c' => {
+                            self.exit();
+                            process::exit(0);
+                        }
                         KeyEvent::Backspace => {
                             chars.pop();
                             self.cursor.move_left(1);
-                            self.terminal.clear(ClearType::UntilNewLine);
+                            self.terminal.clear(ClearType::UntilNewLine).expect("error clearing display");
                         }
                         _ => (),
                     },
@@ -95,6 +101,10 @@ impl Display {
                 match c {
                     InputEvent::Keyboard(e) => match e {
                         KeyEvent::Char(c) if c as u8 == 10 => break 'outer,
+                        KeyEvent::Ctrl(c) if c == 'c' => {
+                            self.exit();
+                            process::exit(0);
+                        }
                         _ => (),
                     },
                     _ => (),
@@ -104,6 +114,7 @@ impl Display {
     }
 
     fn exit(&self) {
+        RawScreen::disable_raw_mode().expect("error disabling raw-mode");
         self.show_cursor();
     }
 
