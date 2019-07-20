@@ -4,6 +4,7 @@
 use crate::parser;
 
 /// Represents a single flashcard.
+#[derive(Clone, Debug)]
 pub struct FlashCard {
     /// The front of a flashcard.
     pub face: String,
@@ -14,6 +15,7 @@ pub struct FlashCard {
 /// Represents a box of flashcards.
 pub struct CardBox {
     flashcards: Vec<FlashCard>,
+    index: usize,
     size: usize,
 }
 
@@ -27,9 +29,10 @@ impl CardBox {
     /// ```
     pub fn from_file(path: &str) -> Self {
         let flashcards = parser::parse(path);
+        let index = 0;
         let size = flashcards.len();
 
-        Self { flashcards, size }
+        Self { flashcards, index, size }
     }
 
     /// Creates a new learning session.
@@ -38,6 +41,20 @@ impl CardBox {
     /// Returns the number of cards in the card box.
     pub fn size(&self) -> usize {
         self.size
+    }
+}
+
+impl Iterator for CardBox {
+    type Item = FlashCard;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let index = self.index;
+        if index < self.size {
+            self.index += 1;
+            Some(self.flashcards[index].clone())
+        } else {
+            None
+        }
     }
 }
 
