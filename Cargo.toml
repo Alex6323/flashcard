@@ -1,0 +1,12 @@
+[package]
+name = "flash"
+version = "0.1.0"
+authors = ["Alex6323 <Al3k5@protonmail.com>"]
+edition = "2018"
+keywords = ["learning", "IOTA", "flashcards"]
+description = """
+A flashcard inspired learning application for the terminal using IOTA microtransactions for gamification.
+"""
+[dependencies]
+crossterm = "0.9.6"
+structopt = "0.2.18"

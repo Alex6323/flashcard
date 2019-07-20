@@ -1,0 +1,30 @@
+# Show the first 10 lines of file
+    head file
+
+# print the first NUM bytes of each file; with the leading '-', print all but the last NUM bytes of each file
+	-c, --bytes=[-]NUM       
+                             
+# print the first NUM lines instead of the first 10; with the leading '-', print all but the last NUM lines of each file
+	-n, --lines=[-]NUM       
+
+# never print headers giving file names
+	-q, --quiet, --silent    
+
+# always print headers giving file names
+	-v, --verbose            
+
+# line delimiter is NUL, not newline
+	-z, --zero-terminated    
+
+# display this help and exit
+  	--help     
+
+# output version information and exit
+    --version
+
+# Show the first N lines of file
+    head -nN file
+
+# Show the first N bytes of file
+    head -cN file
+
