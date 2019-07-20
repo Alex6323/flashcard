@@ -54,10 +54,7 @@ impl Display {
             for c in reader.next() {
                 match c {
                     InputEvent::Keyboard(e) => match e {
-                        KeyEvent::Char(c) if c as u8 == 10 => {
-                            self.println("");
-                            break 'outer;
-                        }
+                        KeyEvent::Char(c) if c as u8 == 10 => (), //Ignore <ENTER>
                         KeyEvent::Char(c) => {
                             chars.push(c);
                             if validator.check(c) {
@@ -81,6 +78,10 @@ impl Display {
                         _ => (),
                     },
                     _ => (),
+                }
+                if validator.is_happy() {
+                    self.println("\n");
+                    break 'outer;
                 }
             }
         }

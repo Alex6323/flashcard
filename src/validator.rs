@@ -40,6 +40,7 @@ impl InputValidator {
     /// Resets this validator.
     pub fn reset(&mut self) {
         self.index = 0;
+        self.received.iter_mut().for_each(|r| *r = false);
     }
 
     /// Undoes the last validation step.
@@ -48,6 +49,7 @@ impl InputValidator {
             return;
         }
         self.index -= 1;
+        self.received[self.index] = false;
     }
 
     /// Returns true if the user has correctly entered all characters.

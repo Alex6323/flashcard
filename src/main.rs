@@ -10,28 +10,28 @@ fn main() {
     let cardbox = CardBox::from_file("./sample_box.txt");
 
     for flashcard in cardbox {
-        // 1. Print the front side of the flash card
+        // Print the front side of the flash card
         display.println(format!("TASK: {}", flashcard.face));
         print!("\r> ");
         io::stdout().flush().expect("error flushing stdout");
 
-        // 2. Read and validate user input
+        // Read and validate user input
         let mut validator = InputValidator::new(&flashcard.back);
         display.read_input(&mut validator);
 
         //if validator.threshold() > 0.9_f64 {
-            // number of corrections below threshold (e.g typos) -> move up a level
-            // allow to set strictness for validator
+        // number of corrections below threshold (e.g typos) -> move up a level
+        // allow to set strictness for validator
         //} else {
-            // this flashcard remains on current level
+        // this flashcard remains on current level
         //}
 
         if validator.is_happy() {
-            println!("Level up");
+            display.println("Level up");
         } else {
             // Print solution
-            display.println(format!("\nSOLUTION: {}", flashcard.back));
-            println!("Level down");
+            display.println(format!("SOLUTION: {}", flashcard.back));
+            display.println("Level down");
         }
 
         display.println("");
