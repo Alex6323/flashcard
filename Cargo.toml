@@ -10,3 +10,11 @@ A flashcard inspired learning application for the terminal using IOTA microtrans
 [dependencies]
 crossterm = "0.9.6"
 structopt = "0.2.18"
+
+[lib]
+name = "flash"
+path = "src/lib.rs"
+
+[[bin]]
+name = "flash"
+path = "src/main.rs"

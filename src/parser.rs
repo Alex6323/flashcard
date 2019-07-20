@@ -2,8 +2,8 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
+use crate::cardbox::FlashCard;
 use crate::constants::MARKUP_FACE;
-use crate::FlashCard;
 
 struct FlashCardFactory {
     face: Option<String>,
@@ -49,38 +49,31 @@ impl ParserState {
             panic!("cannot parse file");
         }
         *self = state;
-    } 
+    }
 
     fn can_move_to(&self, next_state: &ParserState) -> bool {
         match *self {
-            ParserState::Init => {
-                match *next_state {
-                    ParserState::Init => true,
-                    ParserState::Face => true,
-                    ParserState::Back => false,
-                }
-            }
-            ParserState::Face => {
-                match *next_state {
-                    ParserState::Init => true,
-                    ParserState::Face => false,
-                    ParserState::Back => true,
-                }
-            }
-            ParserState::Back => {
-                match *next_state {
-                    ParserState::Init => true,
-                    ParserState::Face => true,
-                    ParserState::Back => false,
-                }
-            }
+            ParserState::Init => match *next_state {
+                ParserState::Init => true,
+                ParserState::Face => true,
+                ParserState::Back => false,
+            },
+            ParserState::Face => match *next_state {
+                ParserState::Init => true,
+                ParserState::Face => false,
+                ParserState::Back => true,
+            },
+            ParserState::Back => match *next_state {
+                ParserState::Init => true,
+                ParserState::Face => true,
+                ParserState::Back => false,
+            },
         }
     }
-
 }
 
-pub fn parse(fname: &str) -> Vec<FlashCard> {
-    let path = Path::new(fname);
+pub fn parse(path: &str) -> Vec<FlashCard> {
+    let path = Path::new(path);
     let file = File::open(&path).unwrap();
     let buff = BufReader::new(file);
     let mut flashcards = vec![];
@@ -110,7 +103,7 @@ pub fn parse(fname: &str) -> Vec<FlashCard> {
             _ => {
                 state.move_to(ParserState::Init);
                 factory.reset();
-            } 
+            }
         }
     }
     flashcards
