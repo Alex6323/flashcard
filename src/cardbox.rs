@@ -24,7 +24,7 @@ impl CardBox {
     ///
     /// # Example
     /// ```
-    /// # use flash::CardBox;
+    /// # use flash::prelude::*;
     /// let cardbox = CardBox::from_file("./sample_box.txt");
     /// ```
     pub fn from_file(path: &str) -> Self {

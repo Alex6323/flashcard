@@ -1,5 +1,4 @@
-use flash::CardBox;
-use flash::Display;
+use flash::prelude::*;
 
 use std::io::{self, Write};
 
@@ -10,23 +9,33 @@ fn main() {
 
     let cardbox = CardBox::from_file("./sample_box.txt");
 
-    let mut input = String::new();
-
     for flashcard in cardbox {
         // 1. Print the front side of the flash card
         display.println(format!("TASK: {}", flashcard.face));
         print!("\r> ");
         io::stdout().flush().expect("error flushing stdout");
 
-        // 2. Wait for user input
-        input = display.read_input();
-        //io::stdin().read_line(&mut input).expect("error reading input");
+        // 2. Read and validate user input
+        let mut validator = InputValidator::new(&flashcard.back);
+        display.read_input(&mut validator);
 
-        // 3. Print solution
-        display.println(format!("SOLUTION: {}", flashcard.back));
+        //if validator.threshold() > 0.9_f64 {
+            // number of corrections below threshold (e.g typos) -> move up a level
+            // allow to set strictness for validator
+        //} else {
+            // this flashcard remains on current level
+        //}
+
+        if validator.is_happy() {
+            println!("Level up");
+        } else {
+            // Print solution
+            display.println(format!("\nSOLUTION: {}", flashcard.back));
+            println!("Level down");
+        }
+
+        display.println("");
         display.println("<PRESS ENTER>");
-        //io::stdout().flush().expect("error flushing stdout");
-
         display.wait_for_return();
         display.clear();
     }

@@ -1,30 +1,30 @@
 # Show the first 10 lines of file 'hello.txt'
     head hello.txt
 
-# print the first NUM bytes of each file; with the leading '-', print all but the last NUM bytes of each file
-	-c, --bytes=[-]NUM       
+# print the first 5 bytes of each file; with the leading '-', print all but the last NUM bytes of each file
+	head -c5, head --bytes=[-]5       
                              
-# print the first NUM lines instead of the first 10; with the leading '-', print all but the last NUM lines of each file
-	-n, --lines=[-]NUM       
+# print the first 5 lines instead of the first 10; with the leading '-', print all but the last NUM lines of each file
+	head -n5, head --lines=[-]5       
 
 # never print headers giving file names
-	-q, --quiet, --silent    
+	head -q, head --quiet, head --silent    
 
 # always print headers giving file names
-	-v, --verbose            
+	head -v, head --verbose            
 
 # line delimiter is NUL, not newline
-	-z, --zero-terminated    
+	head -z, head --zero-terminated    
 
 # display this help and exit
-  	--help     
+  	head --help     
 
 # output version information and exit
-    --version
+    head --version
 
-# Show the first N lines of file
-    head -nN file
+# Show the first 5 lines of file 'hello.txt'
+    head -n5 hello.txt
 
-# Show the first N bytes of file
-    head -cN file
+# Show the first 5 bytes of file 'hello.txt'
+    head -c5 hello.txt
 

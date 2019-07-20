@@ -5,9 +5,16 @@
 
 mod constants;
 mod parser;
+mod validator;
 
 pub mod cardbox;
 pub mod display;
 
-pub use cardbox::CardBox;
-pub use display::Display;
+/// Re-export of commonly used types.
+pub mod prelude {
+    use super::*;
+
+    pub use cardbox::CardBox;
+    pub use display::Display;
+    pub use validator::InputValidator;
+}
