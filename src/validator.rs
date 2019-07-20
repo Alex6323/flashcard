@@ -10,6 +10,13 @@ pub struct InputValidator {
     received: Vec<bool>,
     index: usize,
     length: usize,
+    /// Indicates whether hint mode is currently active.
+    pub hint_mode: HintMode,
+}
+
+pub enum HintMode {
+    Inactive,
+    Active(usize),
 }
 
 impl InputValidator {
@@ -19,7 +26,7 @@ impl InputValidator {
         let length = expected.len();
         let received = vec![false; length];
 
-        Self { expected, received, index: 0, length }
+        Self { expected, received, index: 0, length, hint_mode: HintMode::Inactive }
     }
 
     /// Checks the given character against the corresponding character of the expected
@@ -55,6 +62,31 @@ impl InputValidator {
     /// Returns true if the user has correctly entered all characters.
     pub fn is_happy(&self) -> bool {
         self.received.iter().all(|r| *r)
+    }
+
+    /// Activates the hint mode, and returns a hint/part of the flashcard back.
+    ///
+    /// Repeated calls will reveal more information until there is either nothing to
+    /// reveal or the `hint_close` call.
+    pub fn hint(&mut self) -> Option<char> {
+        match self.hint_mode {
+            HintMode::Inactive => {
+                self.hint_mode = HintMode::Active(self.index);
+                return Some(self.expected[self.index]);
+            }
+            HintMode::Active(index) => {
+                if index < self.length - 1 {
+                    self.hint_mode = HintMode::Active(index + 1);
+                    return Some(self.expected[index + 1]);
+                }
+            }
+        }
+        None
+    }
+
+    /// Ends the hint mode.
+    pub fn hint_close(&mut self) {
+        self.hint_mode = HintMode::Inactive;
     }
 }
 
@@ -144,5 +176,12 @@ mod tests {
         assert!(!v.is_happy());
         assert!(v.check('o'));
         assert!(v.is_happy());
+    }
+
+    #[test]
+    fn hint() {
+        let mut v = InputValidator::new("hello");
+        assert_eq!(Some('h'), v.hint());
+        assert_eq!(Some('e'), v.hint());
     }
 }

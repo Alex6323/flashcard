@@ -1,5 +1,5 @@
 //! A display for the terminal.
-use crate::validator::InputValidator;
+use crate::validator::{InputValidator, HintMode};
 
 use crossterm::RawScreen;
 use crossterm::{ClearType, Terminal, TerminalCursor, TerminalInput};
@@ -47,7 +47,6 @@ impl Display {
         self.show_cursor();
 
         let mut reader = self.input.read_sync();
-
         let mut chars = vec![];
 
         'outer: loop {
@@ -56,6 +55,21 @@ impl Display {
                     InputEvent::Keyboard(e) => match e {
                         KeyEvent::Char(c) if c as u8 == 10 => (), //Ignore <ENTER>
                         KeyEvent::Char(c) => {
+                            match validator.hint_mode {
+                                HintMode::Active(_) => {
+                                    // Delete the hint
+                                    self.cursor
+                                        .reset_position()
+                                        .expect("error resetting postion");
+
+                                    self.terminal
+                                        .clear(ClearType::UntilNewLine)
+                                        .expect("error clearing rest of line");
+
+                                    validator.hint_close();
+                                    }
+                                _ => ()
+                            }
                             chars.push(c);
                             if validator.check(c) {
                                 self.cprint(c, Color::Green);
@@ -74,6 +88,20 @@ impl Display {
                             self.terminal
                                 .clear(ClearType::UntilNewLine)
                                 .expect("error clearing display");
+                        }
+                        KeyEvent::F(n) if n == 10 => {
+                            match validator.hint_mode {
+                                HintMode::Inactive => {
+                                self.cursor
+                                    .save_position()
+                                    .expect("error saving position");
+
+                                }
+                                _ => ()
+                            }
+                            if let Some(c) = validator.hint() {
+                                self.cprint(c, Color::Yellow);
+                            }
                         }
                         _ => (),
                     },
@@ -105,6 +133,16 @@ impl Display {
     /// Prints text to the terminal with a newline character.
     pub fn println(&self, text: impl std::fmt::Display) {
         self.terminal.write(format!("\r{}\n", text)).expect("error writing to terminal");
+    }
+
+    /// Prints colored text to the terminal at a certain position.
+    pub fn cprint_at(&self, text: impl std::fmt::Display, x: u16, y: u16, color: Color) {
+        let (ox, oy) = self.cursor.pos();
+
+        self.cursor.goto(x, y).expect("couldn't move cursor");
+        print!("{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
+
+        self.cursor.goto(ox, oy).expect("couldn't move cursor");
     }
 
     /// Ignores all input except <RETURN> and <CRTL-C>
@@ -145,21 +183,6 @@ impl Display {
         print!("║{}", Colored::Fg(color));
         print!("{: <1$}", text, width);
         println!("{}║", Colored::Fg(Color::Reset));
-    }
-
-    fn colprint_at_pos(
-        text: &str,
-        x: u16,
-        y: u16,
-        color: Color,
-        cursor: &TerminalCursor,
-    ) {
-        let (old_x, old_y) = cursor.pos();
-        cursor.goto(x, y).expect("couldn't move cursor");
-
-        print!("{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
-
-        cursor.goto(old_x, old_y).expect("couldn't move cursor");
     }
     */
 }
