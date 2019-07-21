@@ -3,11 +3,14 @@ use flash::prelude::*;
 use std::io::{self, Write};
 
 fn main() {
+    let cli = Cli::new();
+    
     let mut display = Display::new();
     display.clear();
     display.print_header();
 
-    let cardbox = CardBox::from_file("./sample_box.txt");
+    //let cardbox = CardBox::from_file("./sample_box.txt");
+    let cardbox = CardBox::from_file(cli.filepath());
 
     for flashcard in cardbox {
         // Print the front side of the flash card

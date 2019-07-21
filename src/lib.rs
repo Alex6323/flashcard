@@ -6,6 +6,7 @@
 mod constants;
 mod parser;
 mod validator;
+mod cli;
 
 pub mod cardbox;
 pub mod display;
@@ -17,4 +18,5 @@ pub mod prelude {
     pub use cardbox::CardBox;
     pub use display::Display;
     pub use validator::InputValidator;
+    pub use cli::Cli;
 }
