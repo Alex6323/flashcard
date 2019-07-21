@@ -1,3 +1,36 @@
+# Initialize a new git repository within the current directory
+    git init
+
+# Start tracking every file in the current dir
+    git add *, git add .
+
+# Start tracking only Rust source files
+    git add *.rs
+
+# Start tracking or stage changes of file 'hello.rs'
+    git add hello.rs
+
+# Commit changes to the repository with message 'Initial Commit'
+    git commit -m "Initial Commit"
+
+# Commit changes and pop up an editor to explain the changes
+    git commit
+
+# Stage and commit all changes, and pop up an editor for entering a commit message
+    git commit -a
+
+# Undo the last commit (and/or change the last commit message)
+    git commit --amend
+
+# Display current branch, untracked and modified files
+    git status
+
+# Show what has been changed
+    git diff
+
+# Show staged but not yet committed changes
+    git diff --cached
+
 # Show the first 10 lines of file 'hello.txt'
     head hello.txt
 

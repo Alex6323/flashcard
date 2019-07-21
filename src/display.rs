@@ -1,5 +1,5 @@
 //! A display for the terminal.
-use crate::validator::{InputValidator, HintMode};
+use crate::validator::{HintMode, InputValidator};
 
 use crossterm::RawScreen;
 use crossterm::{ClearType, Terminal, TerminalCursor, TerminalInput};
@@ -57,18 +57,9 @@ impl Display {
                         KeyEvent::Char(c) => {
                             match validator.hint_mode {
                                 HintMode::Active(_) => {
-                                    // Delete the hint
-                                    self.cursor
-                                        .reset_position()
-                                        .expect("error resetting postion");
-
-                                    self.terminal
-                                        .clear(ClearType::UntilNewLine)
-                                        .expect("error clearing rest of line");
-
-                                    validator.hint_close();
-                                    }
-                                _ => ()
+                                    self.clear_hint(validator);
+                                }
+                                _ => (),
                             }
                             chars.push(c);
                             if validator.check(c) {
@@ -82,22 +73,30 @@ impl Display {
                             process::exit(0);
                         }
                         KeyEvent::Backspace => {
-                            chars.pop();
-                            validator.undo();
-                            self.cursor.move_left(1);
-                            self.terminal
-                                .clear(ClearType::UntilNewLine)
-                                .expect("error clearing display");
+                            match validator.hint_mode {
+                                HintMode::Active(_) => {
+                                    self.clear_hint(validator);
+                                }
+                                _ => (),
+                            }
+
+                            if !chars.is_empty() {
+                                chars.pop();
+                                validator.undo();
+                                self.cursor.move_left(1);
+                                self.terminal
+                                    .clear(ClearType::UntilNewLine)
+                                    .expect("error clearing display");
+                            }
                         }
                         KeyEvent::F(n) if n == 10 => {
                             match validator.hint_mode {
                                 HintMode::Inactive => {
-                                self.cursor
-                                    .save_position()
-                                    .expect("error saving position");
-
+                                    self.cursor
+                                        .save_position()
+                                        .expect("error saving position");
                                 }
-                                _ => ()
+                                _ => (),
                             }
                             if let Some(c) = validator.hint() {
                                 self.cprint(c, Color::Yellow);
@@ -178,6 +177,15 @@ impl Display {
         self.cursor.show().expect("error showing cursor");
     }
 
+    fn clear_hint(&self, validator: &mut InputValidator) {
+        self.cursor.reset_position().expect("error resetting postion");
+
+        self.terminal
+            .clear(ClearType::UntilNewLine)
+            .expect("error clearing rest of line");
+
+        validator.hint_close();
+    }
     /*
     fn colprintln(text: &str, color: Color, width: usize) {
         print!("║{}", Colored::Fg(color));
