@@ -20,7 +20,6 @@ impl FlashCardFactory {
     }
 
     pub fn add_back(&mut self, line: &str) {
-        //self.back = Some(String::from(line));
         self.back.push(String::from(line));
     }
 

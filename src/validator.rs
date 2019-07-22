@@ -1,6 +1,6 @@
 //! List validator
 //! - Consists of several `Line Validators`.
-//! 
+//!
 //! Line validator
 //!
 //! Compares two strings
@@ -8,11 +8,11 @@
 //! - the string entered by the user
 
 /// Represents a validator for a list of lines.
-/// 
+///
 /// The whole list is validated once all sub-validators are "happy".
 pub struct ListValidator {
     /// The contained list of `Line Validators`.
-    pub validators: Vec<LineValidator>, 
+    pub validators: Vec<LineValidator>,
     ///
     pub index: usize,
     ///
@@ -30,11 +30,7 @@ impl ListValidator {
 
         let length = validators.len();
 
-        Self {
-            validators, 
-            index: 0,
-            length,
-        }
+        Self { validators, index: 0, length }
     }
 
     /// Returns `true` if all sub-validators are "happy".

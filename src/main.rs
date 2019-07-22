@@ -31,6 +31,6 @@ fn main() {
         display.println_cr("");
         display.println_cr("<PRESS ENTER>");
         display.wait_for_return();
-        display.clear();
+        display.clear_except_header();
     }
 }

@@ -1,5 +1,6 @@
 //! A display for the terminal.
 use crate::validator::{HintMode, LineValidator};
+use crate::constants::{APP_NAME, APP_VERSION, HEADER_HEIGHT};
 
 use crossterm::RawScreen;
 use crossterm::{ClearType, Terminal, TerminalCursor, TerminalInput};
@@ -14,8 +15,8 @@ pub struct Display {
     cursor: TerminalCursor,
     input: TerminalInput,
     raw: RawScreen,
-    width: u16,
-    height: u16,
+    width: usize,
+    height: usize,
 }
 
 impl Display {
@@ -28,7 +29,14 @@ impl Display {
 
         let (width, height) = terminal.terminal_size();
 
-        Self { terminal, cursor, input, raw, width, height }
+        Self {
+            terminal,
+            cursor,
+            input,
+            raw,
+            width: width as usize,
+            height: height as usize,
+        }
     }
 
     /// Clears the complete terminal. Should be called early.
@@ -37,9 +45,26 @@ impl Display {
         self.hide_cursor();
     }
 
+    /// Clears everything except the header.
+    pub fn clear_except_header(&self) {
+
+        self.cursor.goto(0, HEADER_HEIGHT).expect("error moving cursor");
+        self.terminal.clear(ClearType::FromCursorDown).expect("error clearing display");
+    }
+
     /// Prints useful information about this cardbox.
     pub fn print_header(&self) {
         //
+        let name_version = format!(" {} {}", APP_NAME, APP_VERSION);
+        let name_version_x = self.width as u16 / 2 - name_version.len() as u16 / 2;
+
+        print_frame_top(self.width);
+        print_frame_mid(self.width);
+        print_frame_mid(self.width);
+        print_frame_mid(self.width);
+        print_frame_bot(self.width);
+
+        self.cprint_at(name_version, name_version_x, 2, Color::DarkBlue);
     }
 
     /// Reads input from user.
@@ -142,7 +167,8 @@ impl Display {
         print!("{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
     }
 
-    /// Prints colored text to the terminal without newline character after carriage return.
+    /// Prints colored text to the terminal without newline character after carriage
+    /// return.
     pub fn cprint_cr(&self, text: impl std::fmt::Display, color: Color) {
         print!("\r{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
     }
@@ -223,18 +249,28 @@ impl Display {
                 .expect("error clearing rest of line");
         }
     }
-
-    /*
-    fn colprintln(text: &str, color: Color, width: usize) {
-        print!("║{}", Colored::Fg(color));
-        print!("{: <1$}", text, width);
-        println!("{}║", Colored::Fg(Color::Reset));
-    }
-    */
 }
 
 impl Drop for Display {
     fn drop(&mut self) {
         self.exit();
     }
+}
+
+fn cprintln_frame(text: &str, color: Color, width: usize) {
+    print!("\r║{}", Colored::Fg(color));
+    print!("{: <1$}", text, width - 1);
+    println!("{}║", Colored::Fg(Color::Reset));
+}
+
+fn print_frame_top(width: usize) {
+    println!("\r╔{:═<1$}╗", "", width - 1);
+}
+
+fn print_frame_mid(width: usize) {
+    println!("\r║{: <1$}║", "", width - 1);
+}
+
+fn print_frame_bot(width: usize) {
+    println!("\r╚{:═<1$}╝", "", width - 1);
 }

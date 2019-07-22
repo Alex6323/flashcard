@@ -1,3 +1,106 @@
+# How to define an executable program
+	main
+
+# Package declaration
+	package main                    
+
+# Single line comment
+	//                              
+
+# Multiline comment
+	/* */                           
+
+# Main function body
+	func main() {}                   
+
+# Unsigned integers
+	uint8, uint16, uint32, uint64   
+
+# Signed integers
+	int8, int16, int32, int64       
+
+# Floating point numbers
+	float8, float16, float32, float64                         
+
+# Texts consisting of alphanumerical symbols
+	string                          
+
+# Boolean type
+	bool                            
+
+# Create a new variable 'a' of type TYPE and assign VALUE to it
+	var a TYPE = VALUE              
+
+# Create a new immutable type-inferred variable 'a'
+	a := VALUE                      
+	NOTE: 0 results in integer, 0.0 results in float64
+
+# Arithmetic operators
+	+ - * / %                       
+
+# Logical operators (and, or, not)
+	&& || !                       
+
+# Relational operators
+	== != < > <= >=            
+
+# Defines a constant
+	const a TYPE = VALUE            
+
+# Defining a structure with fields a, b that hold VALUE1 and VALUE2
+	var (                           
+   	 	a = VALUE1
+   	 	b = VALUE2
+	)
+
+# Defines a for-loop with predefined index variable
+	i := 1 
+	for i <= MAX {}                               
+
+# Defines a for-loop
+	for j:=0; j < MAX; j++ {}                               
+
+# Equivalent to i = i + 1 (postfix notation)
+	i++                             
+
+# Exit loop
+	break                           
+
+# If-statement (no parentheses)
+	if CONDITION1 {} else if CONDITION2 {} else {}
+
+# Switch-statement (is there a select keyword, too???)  
+	switch i {                      
+    	case a : EXPRESSION1 
+    	case b : EXPRESSION2
+    	default : EXPRESSION3
+	}
+
+# Defines an array of a certain TYPE and length 'len'
+	var arr[len] TYPE               
+
+# Assign value to the array at a specific array index
+	arr[i] = a                      
+
+# Declares and initializes an array at the same time
+	arr := [len]TYPE { a, b, ... }  
+
+# Extracts index and value from the array
+	for i, a := range arr {         
+    	expression(a, i)
+	}
+
+# Ignores index, just interested in the values
+	for _, a := range arr {         
+    	expression(a)
+	}                       
+
+# Cast integer to float
+	float64(i)                 
+
+# Cast float to integer     
+	int(f)                          
+
 # Initialize a new git repository within the current directory
     git init
 
