@@ -136,17 +136,49 @@ mod tests {
     }
 
     #[test]
-    fn check_corrected_input() {
+    fn undo_1() {
         let mut v = InputValidator::new("hello");
-        assert!(v.check('h'));
-        assert!(!v.check('3'));
+        v.check('h');
+        v.check('3');
         v.undo(1);
-        assert!(v.check('e'));
-        assert!(v.check('l'));
-        assert!(v.check('l'));
-        assert!(!v.check('0'));
+        v.check('e');
+        v.check('l');
+        v.check('l');
+        v.check('0');
         v.undo(1);
-        assert!(v.check('o'));
+        v.check('o');
+
+        assert!(v.is_happy());
+    }
+
+    #[test]
+    fn undo_0() {
+        let mut v = InputValidator::new("hello");
+        v.check('h');
+        v.undo(0);
+        v.check('e');
+        v.undo(0);
+        v.check('l');
+        v.undo(0);
+        v.check('l');
+        v.undo(0);
+        v.check('o');
+        v.undo(0);
+        assert!(v.is_happy());
+    }
+
+    #[test]
+    fn undo_many() {
+        let mut v = InputValidator::new("hello");
+        v.check('h');
+        v.check('e');
+        v.undo(2);
+        v.check('h');
+        v.check('e');
+        v.check('l');
+        v.check('l');
+        v.check('o');
+        assert!(v.is_happy());
     }
 
     #[test]

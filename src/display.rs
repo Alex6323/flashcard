@@ -63,7 +63,8 @@ impl Display {
                                 _ => (),
                             }
 
-                            // only allow typing if the validator still accepts more characters
+                            // only allow typing if the validator still accepts more
+                            // characters
                             if validator.is_accepting() {
                                 //chars.push(c);
                                 if validator.check(c) {
@@ -98,7 +99,7 @@ impl Display {
                         KeyEvent::F(n) if n == 10 => {
                             match validator.hint_mode {
                                 HintMode::Inactive => {
-                                    // 
+                                    //
                                     self.clear_incorrect(validator);
 
                                     // go back to the last correct char or to index 0
@@ -199,13 +200,17 @@ impl Display {
         validator.hint_close();
     }
 
-    /// This function is used to remove all correct/incorrect characters after the first incorrect character
+    /// This function is used to remove all correct/incorrect characters after the first
+    /// incorrect character
     fn clear_incorrect(&mut self, validator: &mut InputValidator) {
         if let Some(first_incorrect) = validator.first_incorrect() {
             let delta = validator.index - first_incorrect;
 
             validator.undo(delta);
-            self.cursor.move_left(delta as u16);
+
+            if delta > 0 {
+                self.cursor.move_left(delta as u16);
+            }
 
             self.terminal
                 .clear(ClearType::UntilNewLine)
