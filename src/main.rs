@@ -1,7 +1,5 @@
 use flash::prelude::*;
 
-use std::io::{self, Write};
-
 fn main() {
     let cli = Cli::new();
 
@@ -9,36 +7,29 @@ fn main() {
     display.clear();
     display.print_header();
 
-    //let cardbox = CardBox::from_file("./sample_box.txt");
     let cardbox = CardBox::from_file(cli.filepath());
 
     for flashcard in cardbox {
-        // Print the front side of the flash card
-        display.println(format!("{}", flashcard.face));
-        print!("\r> ");
-        io::stdout().flush().expect("error flushing stdout");
+        // Print the front side of the flash card which usually describes the task
+        display.println_cr(format!("{}", flashcard.face));
 
-        // Read and validate user input
-        let mut validator = InputValidator::new(&flashcard.back);
-        display.read_input(&mut validator);
+        let mut list_v = ListValidator::new(flashcard.back);
+        for mut line_v in &mut list_v.validators {
+            display.print_cr(format!("{} ", PROMPT));
 
-        //if validator.threshold() > 0.9_f64 {
-        // number of corrections below threshold (e.g typos) -> move up a level
-        // allow to set strictness for validator
-        //} else {
-        // this flashcard remains on current level
-        //}
-
-        if validator.is_happy() {
-            display.println("Level up");
-        } else {
-            // Print solution
-            display.println(format!("{}", flashcard.back));
-            display.println("Level down");
+            // Read and validate user input
+            display.read_input(&mut line_v);
         }
 
-        display.println("");
-        display.println("<PRESS ENTER>");
+        display.println_cr("");
+        if list_v.is_happy() {
+            display.println_cr("Level up");
+        } else {
+            display.println_cr("Level down");
+        }
+
+        display.println_cr("");
+        display.println_cr("<PRESS ENTER>");
         display.wait_for_return();
         display.clear();
     }

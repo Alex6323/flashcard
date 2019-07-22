@@ -18,5 +18,7 @@ pub mod prelude {
     pub use cardbox::CardBox;
     pub use cli::Cli;
     pub use display::Display;
-    pub use validator::InputValidator;
+    pub use validator::{LineValidator, ListValidator};
+
+    pub use constants::PROMPT;
 }

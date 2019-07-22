@@ -3,13 +3,19 @@
 
 use crate::parser;
 
+/// Represents a line on a flashcard.
+pub type Line = String;
+
+/// Represents a list of lines on a flashcard.
+pub type List = Vec<Line>;
+
 /// Represents a single flashcard.
 #[derive(Clone, Debug)]
 pub struct FlashCard {
     /// The front of a flashcard.
-    pub face: String,
-    /// The back of a flachard.
-    pub back: String,
+    pub face: Line,
+    /// The back of a flashcard, which can consist of several lines.
+    pub back: List,
 }
 
 /// Represents a box of flashcards.
@@ -48,10 +54,10 @@ impl Iterator for CardBox {
     type Item = FlashCard;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let index = self.index;
-        if index < self.size {
+        if self.index < self.size {
+            let i = self.index;
             self.index += 1;
-            Some(self.flashcards[index].clone())
+            Some(self.flashcards[i].clone())
         } else {
             None
         }

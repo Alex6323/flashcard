@@ -1,5 +1,5 @@
 //! A display for the terminal.
-use crate::validator::{HintMode, InputValidator};
+use crate::validator::{HintMode, LineValidator};
 
 use crossterm::RawScreen;
 use crossterm::{ClearType, Terminal, TerminalCursor, TerminalInput};
@@ -43,11 +43,10 @@ impl Display {
     }
 
     /// Reads input from user.
-    pub fn read_input(&mut self, validator: &mut InputValidator) -> String {
+    pub fn read_input(&mut self, validator: &mut LineValidator) -> String {
         self.show_cursor();
 
         let mut reader = self.input.read_sync();
-        //let mut chars = vec![];
 
         'outer: loop {
             for c in reader.next() {
@@ -66,7 +65,6 @@ impl Display {
                             // only allow typing if the validator still accepts more
                             // characters
                             if validator.is_accepting() {
-                                //chars.push(c);
                                 if validator.check(c) {
                                     self.cprint(c, Color::Green);
                                 } else {
@@ -88,7 +86,6 @@ impl Display {
 
                             //if !chars.is_empty() {
                             if validator.index > 0 {
-                                //chars.pop();
                                 validator.undo(1);
                                 self.cursor.move_left(1);
                                 self.terminal
@@ -118,13 +115,12 @@ impl Display {
                     _ => (),
                 }
                 if validator.is_happy() {
-                    self.println("\n");
+                    self.println_cr("");
                     break 'outer;
                 }
             }
         }
 
-        //let line = chars.iter().collect::<String>();
         let line = validator.get_expected();
 
         self.hide_cursor();
@@ -136,13 +132,23 @@ impl Display {
         self.terminal.write(format!("{}", text)).expect("error writing to terminal");
     }
 
+    /// Prints text to the terminal without newline character after carriage return.
+    pub fn print_cr(&self, text: impl std::fmt::Display) {
+        self.terminal.write(format!("\r{}", text)).expect("error writing to terminal");
+    }
+
     /// Prints colored text to the terminal without newline character.
     pub fn cprint(&self, text: impl std::fmt::Display, color: Color) {
         print!("{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
     }
 
-    /// Prints text to the terminal with a newline character.
-    pub fn println(&self, text: impl std::fmt::Display) {
+    /// Prints colored text to the terminal without newline character after carriage return.
+    pub fn cprint_cr(&self, text: impl std::fmt::Display, color: Color) {
+        print!("\r{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
+    }
+
+    /// Prints text to the terminal with a newline character after carriage return.
+    pub fn println_cr(&self, text: impl std::fmt::Display) {
         self.terminal.write(format!("\r{}\n", text)).expect("error writing to terminal");
     }
 
@@ -190,7 +196,7 @@ impl Display {
     }
 
     /// This function is used to remove the hint once the user starts typing again
-    fn clear_hint(&self, validator: &mut InputValidator) {
+    fn clear_hint(&self, validator: &mut LineValidator) {
         self.cursor.reset_position().expect("error resetting postion");
 
         self.terminal
@@ -202,7 +208,7 @@ impl Display {
 
     /// This function is used to remove all correct/incorrect characters after the first
     /// incorrect character
-    fn clear_incorrect(&mut self, validator: &mut InputValidator) {
+    fn clear_incorrect(&mut self, validator: &mut LineValidator) {
         if let Some(first_incorrect) = validator.first_incorrect() {
             let delta = validator.index - first_incorrect;
 

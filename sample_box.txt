@@ -2,7 +2,8 @@
     git init
 
 # Start tracking every file in the current dir
-    git add *, git add .
+    git add *
+    git add .
 
 # Start tracking only Rust source files
     git add *.rs
