@@ -4,7 +4,7 @@ use std::io::{self, Write};
 
 fn main() {
     let cli = Cli::new();
-    
+
     let mut display = Display::new();
     display.clear();
     display.print_header();
@@ -14,7 +14,7 @@ fn main() {
 
     for flashcard in cardbox {
         // Print the front side of the flash card
-        display.println(format!("TASK: {}", flashcard.face));
+        display.println(format!("{}", flashcard.face));
         print!("\r> ");
         io::stdout().flush().expect("error flushing stdout");
 
@@ -33,7 +33,7 @@ fn main() {
             display.println("Level up");
         } else {
             // Print solution
-            display.println(format!("SOLUTION: {}", flashcard.back));
+            display.println(format!("{}", flashcard.back));
             display.println("Level down");
         }
 

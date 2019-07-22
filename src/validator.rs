@@ -8,8 +8,10 @@
 pub struct InputValidator {
     expected: Vec<char>,
     received: Vec<bool>,
-    index: usize,
-    length: usize,
+    /// The current index the validator is pointing at.
+    pub index: usize,
+    /// The number of characters of the expected input the validator is checking against.
+    pub length: usize,
     /// Indicates whether hint mode is currently active.
     pub hint_mode: HintMode,
 }
@@ -51,17 +53,25 @@ impl InputValidator {
     }
 
     /// Undoes the last validation step.
-    pub fn undo(&mut self) {
+    pub fn undo(&mut self, num: usize) {
         if self.index == 0 {
             return;
         }
-        self.index -= 1;
-        self.received[self.index] = false;
+
+        for _ in 0..num {
+            self.index -= 1;
+            self.received[self.index] = false;
+        }
     }
 
-    /// Returns true if the user has correctly entered all characters.
+    /// Returns `true` if the user has correctly entered all characters.
     pub fn is_happy(&self) -> bool {
         self.received.iter().all(|r| *r)
+    }
+
+    /// Returns `true` if the validator is still accepting more characters.
+    pub fn is_accepting(&self) -> bool {
+        self.index < self.length
     }
 
     /// Activates the hint mode, and returns a hint/part of the flashcard back.
@@ -87,6 +97,17 @@ impl InputValidator {
     /// Ends the hint mode.
     pub fn hint_close(&mut self) {
         self.hint_mode = HintMode::Inactive;
+    }
+
+    /// Returns the index of the first incorrect character, or None if such a character
+    /// doesn't exist.
+    pub fn first_incorrect(&self) -> Option<usize> {
+        self.received.iter().position(|r| !*r)
+    }
+
+    /// Returns the expected `String`.
+    pub fn get_expected(&self) -> String {
+        self.expected.iter().collect::<String>()
     }
 }
 
@@ -119,12 +140,12 @@ mod tests {
         let mut v = InputValidator::new("hello");
         assert!(v.check('h'));
         assert!(!v.check('3'));
-        v.undo();
+        v.undo(1);
         assert!(v.check('e'));
         assert!(v.check('l'));
         assert!(v.check('l'));
         assert!(!v.check('0'));
-        v.undo();
+        v.undo(1);
         assert!(v.check('o'));
     }
 
@@ -164,7 +185,7 @@ mod tests {
         assert!(v.check('h'));
         assert!(!v.check('3'));
         assert!(!v.is_happy());
-        v.undo();
+        v.undo(1);
         assert!(!v.is_happy());
         assert!(v.check('e'));
         assert!(v.check('l'));
@@ -172,7 +193,7 @@ mod tests {
         assert!(v.check('l'));
         assert!(!v.check('0'));
         assert!(!v.is_happy());
-        v.undo();
+        v.undo(1);
         assert!(!v.is_happy());
         assert!(v.check('o'));
         assert!(v.is_happy());
@@ -183,5 +204,57 @@ mod tests {
         let mut v = InputValidator::new("hello");
         assert_eq!(Some('h'), v.hint());
         assert_eq!(Some('e'), v.hint());
+    }
+
+    #[test]
+    fn hints_dont_satisfy_validator() {
+        let mut v = InputValidator::new("hello");
+        assert_eq!(Some('h'), v.hint());
+        assert_eq!(Some('e'), v.hint());
+        assert_eq!(Some('l'), v.hint());
+        assert_eq!(Some('l'), v.hint());
+        assert_eq!(Some('o'), v.hint());
+        assert!(!v.is_happy());
+    }
+
+    #[test]
+    fn none_incorrect() {
+        let mut v = InputValidator::new("hello");
+
+        assert_eq!(Some(0), v.first_incorrect());
+
+        v.check('h');
+        v.check('e');
+        v.check('l');
+        v.check('l');
+        v.check('o');
+
+        assert_eq!(None, v.first_incorrect());
+    }
+
+    #[test]
+    fn first_incorrect() {
+        let mut v = InputValidator::new("hello");
+
+        assert_eq!(Some(0), v.first_incorrect());
+
+        v.check('h');
+        v.check('e');
+
+        // NOTE: per default missing characters are considered incorrect
+        assert_eq!(Some(2), v.first_incorrect());
+
+        v.check('l');
+        v.check('1');
+        v.check('o');
+
+        assert_eq!(Some(3), v.first_incorrect());
+    }
+
+    #[test]
+    fn get_expected() {
+        let mut v = InputValidator::new("hello");
+
+        assert_eq!("hello", &v.get_expected());
     }
 }

@@ -47,7 +47,7 @@ impl Display {
         self.show_cursor();
 
         let mut reader = self.input.read_sync();
-        let mut chars = vec![];
+        //let mut chars = vec![];
 
         'outer: loop {
             for c in reader.next() {
@@ -55,17 +55,22 @@ impl Display {
                     InputEvent::Keyboard(e) => match e {
                         KeyEvent::Char(c) if c as u8 == 10 => (), //Ignore <ENTER>
                         KeyEvent::Char(c) => {
+                            // if the user starts typing remove the hint if shown
                             match validator.hint_mode {
                                 HintMode::Active(_) => {
                                     self.clear_hint(validator);
                                 }
                                 _ => (),
                             }
-                            chars.push(c);
-                            if validator.check(c) {
-                                self.cprint(c, Color::Green);
-                            } else {
-                                self.cprint(c, Color::Red);
+
+                            // only allow typing if the validator still accepts more characters
+                            if validator.is_accepting() {
+                                //chars.push(c);
+                                if validator.check(c) {
+                                    self.cprint(c, Color::Green);
+                                } else {
+                                    self.cprint(c, Color::Red);
+                                }
                             }
                         }
                         KeyEvent::Ctrl(c) if c == 'c' => {
@@ -80,9 +85,10 @@ impl Display {
                                 _ => (),
                             }
 
-                            if !chars.is_empty() {
-                                chars.pop();
-                                validator.undo();
+                            //if !chars.is_empty() {
+                            if validator.index > 0 {
+                                //chars.pop();
+                                validator.undo(1);
                                 self.cursor.move_left(1);
                                 self.terminal
                                     .clear(ClearType::UntilNewLine)
@@ -92,6 +98,10 @@ impl Display {
                         KeyEvent::F(n) if n == 10 => {
                             match validator.hint_mode {
                                 HintMode::Inactive => {
+                                    // 
+                                    self.clear_incorrect(validator);
+
+                                    // go back to the last correct char or to index 0
                                     self.cursor
                                         .save_position()
                                         .expect("error saving position");
@@ -113,7 +123,8 @@ impl Display {
             }
         }
 
-        let line = chars.iter().collect::<String>();
+        //let line = chars.iter().collect::<String>();
+        let line = validator.get_expected();
 
         self.hide_cursor();
         line
@@ -177,6 +188,7 @@ impl Display {
         self.cursor.show().expect("error showing cursor");
     }
 
+    /// This function is used to remove the hint once the user starts typing again
     fn clear_hint(&self, validator: &mut InputValidator) {
         self.cursor.reset_position().expect("error resetting postion");
 
@@ -186,6 +198,21 @@ impl Display {
 
         validator.hint_close();
     }
+
+    /// This function is used to remove all correct/incorrect characters after the first incorrect character
+    fn clear_incorrect(&mut self, validator: &mut InputValidator) {
+        if let Some(first_incorrect) = validator.first_incorrect() {
+            let delta = validator.index - first_incorrect;
+
+            validator.undo(delta);
+            self.cursor.move_left(delta as u16);
+
+            self.terminal
+                .clear(ClearType::UntilNewLine)
+                .expect("error clearing rest of line");
+        }
+    }
+
     /*
     fn colprintln(text: &str, color: Color, width: usize) {
         print!("║{}", Colored::Fg(color));

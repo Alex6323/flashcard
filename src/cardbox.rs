@@ -66,7 +66,7 @@ mod tests {
     fn create_cardbox() {
         let cardbox = CardBox::from_file("./sample_box.txt");
 
-        assert_eq!(10, cardbox.size())
+        assert_eq!(21, cardbox.size())
     }
 
     #[test]
