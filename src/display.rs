@@ -117,7 +117,7 @@ impl Display {
                                     .expect("error clearing display");
                             }
                         }
-                        KeyEvent::F(n) if n == 10 => {
+                        KeyEvent::Ctrl(c) if c == 'h' => {
                             match validator.hint_mode {
                                 HintMode::Inactive => {
                                     //
