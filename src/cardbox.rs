@@ -16,6 +16,8 @@ pub struct FlashCard {
     pub face: Line,
     /// The back of a flashcard, which can consist of several lines.
     pub back: List,
+    /// An optional note on the flashcard to provide helpful context.
+    pub note: Option<Line>,
 }
 
 /// Represents a box of flashcards.

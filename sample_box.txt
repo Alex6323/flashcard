@@ -1,5 +1,8 @@
+% the link https://en.wikipedia.org should be ignored by the parser.
+
 # How to define an executable program
 	main
+	! This is a note.
 
 # Package declaration
 	package main                    

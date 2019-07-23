@@ -1,6 +1,6 @@
 //! A display for the terminal.
-use crate::validator::{HintMode, LineValidator};
 use crate::constants::{APP_NAME, APP_VERSION, HEADER_HEIGHT};
+use crate::validator::{HintMode, LineValidator};
 
 use crossterm::RawScreen;
 use crossterm::{ClearType, Terminal, TerminalCursor, TerminalInput};
@@ -47,7 +47,6 @@ impl Display {
 
     /// Clears everything except the header.
     pub fn clear_except_header(&self) {
-
         self.cursor.goto(0, HEADER_HEIGHT).expect("error moving cursor");
         self.terminal.clear(ClearType::FromCursorDown).expect("error clearing display");
     }

@@ -15,13 +15,17 @@ fn main() {
 
         let mut list_v = ListValidator::new(flashcard.back);
         for mut line_v in &mut list_v.validators {
-            display.print_cr(format!("{} ", PROMPT));
+            display.print_cr(format!("{} ", PROMPT_INPUT));
 
             // Read and validate user input
             display.read_input(&mut line_v);
         }
 
         display.println_cr("");
+        if let Some(note) = flashcard.note {
+            display.println_cr(format!("NOTE: {}", note));
+        }
+
         if list_v.is_happy() {
             display.println_cr("Level up");
         } else {

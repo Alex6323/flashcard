@@ -20,5 +20,5 @@ pub mod prelude {
     pub use display::Display;
     pub use validator::{LineValidator, ListValidator};
 
-    pub use constants::PROMPT;
+    pub use constants::PROMPT_INPUT;
 }
