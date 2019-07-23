@@ -1,5 +1,14 @@
 % the link https://en.wikipedia.org should be ignored by the parser.
 
+# Test
+	\%
+
+# Another Test
+	\#
+	
+# And yet another Test
+	\!
+	
 # How to define an executable program
 	main
 	! This is a note.

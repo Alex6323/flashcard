@@ -3,7 +3,7 @@ use std::io::{BufRead, BufReader};
 use std::path::Path;
 
 use crate::cardbox::{FlashCard, Line, List};
-use crate::constants::{MARKUP_FACE, MARKUP_NOTE, MARKUP_META};
+use crate::constants::{MARKUP, MARKUP_ESCAPE, MARKUP_FACE, MARKUP_META, MARKUP_NOTE};
 
 /// A factory to produce flashcards from markup.
 struct FlashCardFactory {
@@ -49,11 +49,7 @@ impl FlashCardFactory {
 
         let note = std::mem::replace(&mut self.note, None);
 
-        FlashCard {
-            face: String::from(face.unwrap()),
-            back,
-            note,
-        }
+        FlashCard { face: String::from(face.unwrap()), back, note }
     }
 
     /// Resets the factory so it can be reused to produce another flashcard.
@@ -143,11 +139,12 @@ pub fn parse(path: &str) -> Vec<FlashCard> {
         if line.is_empty() {
             continue;
         }
-
         //println!("{}", line);
 
         // 1st char must exist, so unwrap won't fail ever
-        match line.chars().nth(0).unwrap() {
+        let first_char = line.chars().nth(0).unwrap();
+
+        match first_char {
             MARKUP_FACE => {
                 if state.can_build(&ParserState::Face) {
                     flashcards.push(factory.build());
@@ -164,8 +161,23 @@ pub fn parse(path: &str) -> Vec<FlashCard> {
             }
             MARKUP_META => (), // Ignore this line
             _ => {
+                // If the 1st character is the `Escape` character, and actually used for
+                // escaping a markup char ...
+                if first_char == MARKUP_ESCAPE
+                    && if let Some(c) = line.chars().nth(1) {
+                        MARKUP.contains(&c)
+                    } else {
+                        false
+                    }
+                {
+                    // ... then remove it, and treat the rest of the line as part of the
+                    // flashcard data
+                    factory.add_back(&line.chars().skip(1).collect::<String>());
+                } else {
+                    factory.add_back(line);
+                }
+
                 state.move_to(ParserState::Back);
-                factory.add_back(line.trim());
             }
         }
     }

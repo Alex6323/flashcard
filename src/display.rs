@@ -108,7 +108,6 @@ impl Display {
                                 _ => (),
                             }
 
-                            //if !chars.is_empty() {
                             if validator.index > 0 {
                                 validator.undo(1);
                                 self.cursor.move_left(1);
