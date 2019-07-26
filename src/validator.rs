@@ -21,11 +21,11 @@ pub struct ListValidator {
 
 impl ListValidator {
     /// Creates a new `ListValidator`.
-    pub fn new(list: Vec<String>) -> Self {
+    pub fn new(list: &Vec<String>) -> Self {
         let mut validators = Vec::with_capacity(list.len());
 
         for s in list {
-            validators.push(LineValidator::new(&s));
+            validators.push(LineValidator::new(s));
         }
 
         let length = validators.len();
@@ -342,7 +342,7 @@ mod tests {
 
     #[test]
     fn list_validator_is_happy() {
-        let mut lv = ListValidator::new(vec!["hello".into(), "world".into()]);
+        let mut lv = ListValidator::new(&vec!["hello".into(), "world".into()]);
         lv.validators[0].check('h');
         lv.validators[0].check('e');
         lv.validators[0].check('l');

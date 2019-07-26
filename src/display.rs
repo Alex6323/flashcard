@@ -14,9 +14,9 @@ pub struct Display {
     terminal: Terminal,
     cursor: TerminalCursor,
     input: TerminalInput,
-    raw: RawScreen,
+    _raw: RawScreen,
     width: usize,
-    height: usize,
+    _height: usize,
 }
 
 impl Display {
@@ -25,7 +25,7 @@ impl Display {
         let terminal = crossterm::terminal();
         let cursor = crossterm::cursor();
         let input = crossterm::input();
-        let raw = RawScreen::into_raw_mode().expect("error switching to raw mode");
+        let _raw = RawScreen::into_raw_mode().expect("error switching to raw mode");
 
         let (width, height) = terminal.terminal_size();
 
@@ -33,9 +33,9 @@ impl Display {
             terminal,
             cursor,
             input,
-            raw,
+            _raw,
             width: width as usize,
-            height: height as usize,
+            _height: height as usize,
         }
     }
 

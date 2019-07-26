@@ -1,5 +1,5 @@
 [package]
-name = "flash"
+name = "flashcard"
 version = "0.1.0"
 authors = ["Alex6323 <Al3k5@protonmail.com>"]
 edition = "2018"
@@ -10,11 +10,14 @@ A flashcard inspired learning application for the terminal using IOTA microtrans
 [dependencies]
 crossterm = "0.9.6"
 structopt = "0.2.18"
+twox-hash = "1.4.2"
+iota-lib-rs = "0.3.0"
+dirs = "2.0.1"
 
 [lib]
-name = "flash"
+name = "flashcard"
 path = "src/lib.rs"
 
 [[bin]]
-name = "flash"
+name = "flashcard"
 path = "src/main.rs"

@@ -16,36 +16,15 @@
 # Package declaration
 	package main                    
 
-# Single line comment
-	//                              
-
-# Multiline comment
-	/* */                           
-
 # Main function body
 	func main() {}                   
-
-# Unsigned integers
-	uint8, uint16, uint32, uint64   
-
-# Signed integers
-	int8, int16, int32, int64       
-
-# Floating point numbers
-	float8, float16, float32, float64                         
-
-# Texts consisting of alphanumerical symbols
-	string                          
-
-# Boolean type
-	bool                            
 
 # Create a new variable 'a' of type TYPE and assign VALUE to it
 	var a TYPE = VALUE              
 
 # Create a new immutable type-inferred variable 'a'
 	a := VALUE                      
-	NOTE: 0 results in integer, 0.0 results in float64
+	! 0 results in integer, 0.0 results in float64
 
 # Arithmetic operators
 	+ - * / %                       
@@ -71,12 +50,6 @@
 
 # Defines a for-loop
 	for j:=0; j < MAX; j++ {}                               
-
-# Equivalent to i = i + 1 (postfix notation)
-	i++                             
-
-# Exit loop
-	break                           
 
 # If-statement (no parentheses)
 	if CONDITION1 {} else if CONDITION2 {} else {}
@@ -129,51 +102,8 @@
 # Commit changes to the repository with message 'Initial Commit'
     git commit -m "Initial Commit"
 
-# Commit changes and pop up an editor to explain the changes
-    git commit
-
 # Stage and commit all changes, and pop up an editor for entering a commit message
     git commit -a
 
-# Undo the last commit (and/or change the last commit message)
-    git commit --amend
-
-# Display current branch, untracked and modified files
-    git status
-
-# Show what has been changed
-    git diff
-
 # Show staged but not yet committed changes
     git diff --cached
-
-# Show the first 10 lines of file 'hello.txt'
-    head hello.txt
-
-# print the first 5 bytes of each file; with the leading '-', print all but the last NUM bytes of each file
-	head -c5, head --bytes=[-]5       
-                             
-# print the first 5 lines instead of the first 10; with the leading '-', print all but the last NUM lines of each file
-	head -n5, head --lines=[-]5       
-
-# never print headers giving file names
-	head -q, head --quiet, head --silent    
-
-# always print headers giving file names
-	head -v, head --verbose            
-
-# line delimiter is NUL, not newline
-	head -z, head --zero-terminated    
-
-# display this help and exit
-  	head --help     
-
-# output version information and exit
-    head --version
-
-# Show the first 5 lines of file 'hello.txt'
-    head -n5 hello.txt
-
-# Show the first 5 bytes of file 'hello.txt'
-    head -c5 hello.txt
-

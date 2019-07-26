@@ -1,4 +1,4 @@
-use flash::prelude::*;
+use flashcard::prelude::*;
 
 fn main() {
     let cli = Cli::new();
@@ -7,13 +7,16 @@ fn main() {
     display.clear();
     display.print_header();
 
-    let cardbox = CardBox::from_file(cli.filepath());
+    let mut automat = Automat::new();
+    automat.init(cli.filepath());
 
-    for flashcard in cardbox {
+    // Process flashcards until they all reached final stage, or their interval isn't up
+    // yet
+    while let Some((flashcard, current_stage)) = automat.next() {
         // Print the front side of the flash card which usually describes the task
-        display.println_cr(format!("{}", flashcard.face));
+        display.println_cr(format!("{}", &flashcard.face));
 
-        let mut list_v = ListValidator::new(flashcard.back);
+        let mut list_v = ListValidator::new(&flashcard.back);
         for mut line_v in &mut list_v.validators {
             display.print_cr(format!("{} ", PROMPT_INPUT));
 
@@ -22,14 +25,20 @@ fn main() {
         }
 
         display.println_cr("");
-        if let Some(note) = flashcard.note {
+
+        // Optionally print additional notes
+        if let Some(note) = &flashcard.note {
             display.println_cr(format!("NOTE: {}", note));
         }
 
+        // If the back of the flashcard was entered correctly, increase its stage,
+        // otherwise reset its stage
         if list_v.is_happy() {
+            automat.increase_stage(current_stage);
             display.println_cr("Level up");
         } else {
-            display.println_cr("Level down");
+            automat.reset_stage(current_stage);
+            display.println_cr("Level reset");
         }
 
         display.println_cr("");
@@ -37,4 +46,6 @@ fn main() {
         display.wait_for_return();
         display.clear_except_header();
     }
+
+    display.clear();
 }

@@ -1,12 +1,16 @@
+//! Functionality for parsing flashcard text files.
+
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use std::rc::Rc;
 
-use crate::cardbox::{FlashCard, Line, List};
 use crate::constants::{MARKUP, MARKUP_ESCAPE, MARKUP_FACE, MARKUP_META, MARKUP_NOTE};
+use crate::flashcard::{FlashCard, Line, List};
 
 /// A factory to produce flashcards from markup.
 struct FlashCardFactory {
+    subject: Rc<String>,
     face: Option<Line>,
     back: List,
     note: Option<Line>,
@@ -14,8 +18,13 @@ struct FlashCardFactory {
 
 impl FlashCardFactory {
     /// Creates a new factory.
-    pub fn new() -> Self {
-        Self { face: None, back: vec![], note: None }
+    pub fn new(subject: &str) -> Self {
+        Self {
+            subject: Rc::new(String::from(subject)),
+            face: None,
+            back: vec![],
+            note: None,
+        }
     }
 
     /// Adds the front side of the flashcard.
@@ -49,14 +58,12 @@ impl FlashCardFactory {
 
         let note = std::mem::replace(&mut self.note, None);
 
-        FlashCard { face: String::from(face.unwrap()), back, note }
-    }
-
-    /// Resets the factory so it can be reused to produce another flashcard.
-    pub fn reset(&mut self) {
-        self.face = None;
-        self.back.clear();
-        self.note = None;
+        FlashCard {
+            subject: Rc::clone(&self.subject),
+            face: String::from(face.unwrap()),
+            back,
+            note,
+        }
     }
 }
 
@@ -125,14 +132,16 @@ impl ParserState {
     }
 }
 
+/// Parses the flashcard text file to a `FlashCard` instances.
 pub fn parse(path: &str) -> Vec<FlashCard> {
     let path = Path::new(path);
     let file = File::open(&path).unwrap();
     let buff = BufReader::new(file);
+    let name = path.file_name().unwrap().to_str().unwrap();
 
     let mut flashcards = vec![];
     let mut state = ParserState::Init;
-    let mut factory = FlashCardFactory::new();
+    let mut factory = FlashCardFactory::new(name);
 
     for line in buff.lines().filter_map(|r| r.ok()) {
         let line = line.trim();
@@ -194,8 +203,4 @@ pub fn parse(path: &str) -> Vec<FlashCard> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn parse_sample_lession() {
-        let path = Path::new("./sample_box.txt");
-    }
 }
