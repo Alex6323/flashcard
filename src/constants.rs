@@ -32,7 +32,7 @@ pub const ALLOWED_TYPOS_PER_LINE: usize = 3;
 pub const ALLOWED_HINTS_PER_LINE: usize = 0;
 
 /// Number of flashcards that can be newly added to the 1st queue.
-pub const INITIAL_QUEUE_SIZE: usize = 10;
+pub const INITIAL_QUEUE_SIZE: usize = 3;
 
 pub const STAGE1_COOLDOWN: u64 = 0;
 pub const STAGE2_COOLDOWN: u64 = 120; // 2min

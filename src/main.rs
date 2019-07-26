@@ -33,7 +33,7 @@ fn main() {
 
         // If the back of the flashcard was entered correctly, increase its stage,
         // otherwise reset its stage
-        if list_v.is_happy() {
+        if list_v.has_passed() {
             automat.increase_stage(current_stage);
             display.println_cr("Level up");
         } else {
@@ -43,7 +43,10 @@ fn main() {
 
         display.println_cr("");
         display.println_cr("<PRESS ENTER>");
-        display.wait_for_return();
+        let exit = display.wait_for_return();
+        if exit {
+            break;
+        }
         display.clear_except_header();
     }
 

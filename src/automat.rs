@@ -52,7 +52,6 @@ impl Automat {
     /// into the automat.
     pub fn init(&mut self, path: &str) {
         let flashcards = parser::parse(path);
-
         // Fill all stages according to the progress database
         for flashcard in flashcards.into_iter() {
             let hash = flashcard.get_hash();
@@ -165,30 +164,30 @@ impl Automat {
         let current_time = time::get_unix_time_millis();
 
         if let Some(envelope) = self.stage5.front() {
-            if envelope.timestamp < (current_time - STAGE5_COOLDOWN * 1000) {
+            if envelope.timestamp <= (current_time - STAGE5_COOLDOWN * 1000) {
                 return Some((&envelope.flashcard, 5));
             }
         }
 
         if let Some(envelope) = self.stage4.front() {
-            if envelope.timestamp < (current_time - STAGE4_COOLDOWN * 1000) {
+            if envelope.timestamp <= (current_time - STAGE4_COOLDOWN * 1000) {
                 return Some((&envelope.flashcard, 4));
             }
         }
 
         if let Some(envelope) = self.stage3.front() {
-            if envelope.timestamp < (current_time - STAGE3_COOLDOWN * 1000) {
+            if envelope.timestamp <= (current_time - STAGE3_COOLDOWN * 1000) {
                 return Some((&envelope.flashcard, 3));
             }
         }
 
         if let Some(envelope) = self.stage2.front() {
-            if envelope.timestamp < (current_time - STAGE2_COOLDOWN * 1000) {
+            if envelope.timestamp <= (current_time - STAGE2_COOLDOWN * 1000) {
                 return Some((&envelope.flashcard, 2));
             }
         }
         if let Some(envelope) = self.stage1.front() {
-            if envelope.timestamp < (current_time - STAGE1_COOLDOWN * 1000) {
+            if envelope.timestamp <= (current_time - STAGE1_COOLDOWN * 1000) {
                 return Some((&envelope.flashcard, 1));
             }
         }

@@ -187,16 +187,17 @@ impl Display {
     }
 
     /// Ignores all input except <RETURN> and <CRTL-C>
-    pub fn wait_for_return(&self) {
+    pub fn wait_for_return(&self) -> bool {
         let mut reader = self.input.read_sync();
         'outer: loop {
             for c in reader.next() {
                 match c {
                     InputEvent::Keyboard(e) => match e {
-                        KeyEvent::Char(c) if c as u8 == 10 => break 'outer,
+                        KeyEvent::Char(c) if c as u8 == 10 => break 'outer, // <RETURN>
                         KeyEvent::Ctrl(c) if c == 'c' => {
                             self.exit();
-                            process::exit(0);
+                            //process::exit(0);
+                            return true;
                         }
                         _ => (),
                     },
@@ -204,6 +205,7 @@ impl Display {
                 }
             }
         }
+        false
     }
 
     fn exit(&self) {

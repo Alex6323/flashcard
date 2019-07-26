@@ -37,6 +37,11 @@ impl ListValidator {
     pub fn is_happy(&self) -> bool {
         self.validators.iter().all(|v| v.is_happy())
     }
+
+    /// Returns `true` if all sub-validators were passed.
+    pub fn has_passed(&self) -> bool {
+        self.validators.iter().all(|v| v.passed)
+    }
 }
 
 impl Iterator for ListValidator {
@@ -63,6 +68,8 @@ pub struct LineValidator {
     pub length: usize,
     /// Indicates whether hint mode is currently active.
     pub hint_mode: HintMode,
+    ///
+    pub passed: bool,
 }
 
 #[derive(Clone)]
@@ -77,8 +84,16 @@ impl LineValidator {
         let expected = expected.chars().collect::<Vec<_>>();
         let length = expected.len();
         let received = vec![false; length];
+        let passed = true;
 
-        Self { expected, received, index: 0, length, hint_mode: HintMode::Inactive }
+        Self {
+            expected,
+            received,
+            index: 0,
+            length,
+            hint_mode: HintMode::Inactive,
+            passed,
+        }
     }
 
     /// Checks the given character against the corresponding character of the expected
@@ -135,6 +150,7 @@ impl LineValidator {
                 return Some(self.expected[self.index]);
             }
             HintMode::Active(index) => {
+                self.passed = false;
                 if index < self.length - 1 {
                     self.hint_mode = HintMode::Active(index + 1);
                     return Some(self.expected[index + 1]);

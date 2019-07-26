@@ -24,6 +24,11 @@ pub fn load(fname: &str) -> HashMap<u64, Stage> {
     let file = if path.exists() {
         File::open(&path).expect("error opening progress database")
     } else {
+        std::fs::DirBuilder::new()
+            .recursive(true)
+            .create(crate::common::fs::get_app_persistence_path())
+            .expect("error creating db directory");
+
         File::create(&path).expect("error creating progress database")
     };
     let buffered = BufReader::new(file);
