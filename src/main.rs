@@ -11,7 +11,7 @@ fn main() {
 
     // Process flashcards until they all reached final stage, or their interval isn't up
     // yet
-    while let Some((flashcard, current_stage)) = automat.next() {
+    'outer: while let Some((flashcard, current_stage)) = automat.next() {
         display.print_progress(automat.progress());
 
         // Print the front side of the flash card which usually describes the task
@@ -22,7 +22,9 @@ fn main() {
             display.print_cr(format!("{} ", PROMPT_INPUT));
 
             // Read and validate user input
-            display.read_input(&mut line_v);
+            if !display.read_input(&mut line_v) {
+                break 'outer;
+            }
         }
 
         display.println_cr("");
@@ -46,7 +48,7 @@ fn main() {
         display.println_cr("<PRESS ENTER>");
         let exit = display.wait_for_return();
         if exit {
-            break;
+            break 'outer;
         }
 
         display.redraw();

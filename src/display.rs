@@ -5,19 +5,17 @@ use crate::constants::{APP_NAME, APP_VERSION, HEADER_HEIGHT};
 use crate::constants::{BG_COLOR, FG_COLOR};
 use crate::validator::{HintMode, LineValidator};
 
-use crossterm::RawScreen;
+use crossterm::{AlternateScreen, RawScreen};
 use crossterm::{ClearType, Terminal, TerminalCursor, TerminalInput};
 use crossterm::{Color, Colored};
 use crossterm::{InputEvent, KeyEvent};
-
-use std::process;
 
 /// Represents a display to display flashcards.
 pub struct Display {
     terminal: Terminal,
     cursor: TerminalCursor,
     input: TerminalInput,
-    _raw: RawScreen,
+    _alt: AlternateScreen,
     width: usize,
     height: usize,
 }
@@ -25,10 +23,12 @@ pub struct Display {
 impl Display {
     /// Creates a new display.
     pub fn new() -> Self {
+        let _alt = AlternateScreen::to_alternate(true)
+            .expect("error creating raw alternate screen");
+
         let terminal = crossterm::terminal();
         let cursor = crossterm::cursor();
         let input = crossterm::input();
-        let _raw = RawScreen::into_raw_mode().expect("error switching to raw mode");
 
         let (width, height) = terminal.terminal_size();
 
@@ -36,7 +36,7 @@ impl Display {
             terminal,
             cursor,
             input,
-            _raw,
+            _alt,
             width: width as usize,
             height: height as usize,
         }
@@ -118,7 +118,10 @@ impl Display {
     }
 
     /// Reads input from user.
-    pub fn read_input(&mut self, validator: &mut LineValidator) -> String {
+    ///
+    /// Returns `true` if valid input has been read. This function only returns `false`,
+    /// if the program has been instructed to exit.
+    pub fn read_input(&mut self, validator: &mut LineValidator) -> bool {
         self.show_cursor();
 
         let mut reader = self.input.read_sync();
@@ -149,7 +152,7 @@ impl Display {
                         }
                         KeyEvent::Ctrl(c) if c == 'c' => {
                             self.exit();
-                            process::exit(0);
+                            return false;
                         }
                         KeyEvent::Backspace => {
                             match validator.hint_mode {
@@ -197,10 +200,8 @@ impl Display {
             }
         }
 
-        let line = validator.get_expected();
-
         self.hide_cursor();
-        line
+        true
     }
 
     /// Prints text to the terminal without newline character.
@@ -263,7 +264,6 @@ impl Display {
                         KeyEvent::Char(c) if c as u8 == 10 => break 'outer, // <RETURN>
                         KeyEvent::Ctrl(c) if c == 'c' => {
                             self.exit();
-                            //process::exit(0);
                             return true;
                         }
                         _ => (),
