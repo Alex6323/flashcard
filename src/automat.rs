@@ -143,8 +143,29 @@ impl Automat {
     }
 
     /// Saves the progress to the internal key-value store.
-    pub fn save(&self) {
-        db::save(&self.progress, DB_NAME).expect("error saving database");
+    pub fn save(&mut self) {
+        for envelope in self.stage1.iter() {
+            let stage = Stage { index: 1, timestamp_ms: envelope.timestamp };
+            self.progress.insert(envelope.hash, stage);
+        }
+        for envelope in self.stage2.iter() {
+            let stage = Stage { index: 2, timestamp_ms: envelope.timestamp };
+            self.progress.insert(envelope.hash, stage);
+        }
+        for envelope in self.stage3.iter() {
+            let stage = Stage { index: 3, timestamp_ms: envelope.timestamp };
+            self.progress.insert(envelope.hash, stage);
+        }
+        for envelope in self.stage4.iter() {
+            let stage = Stage { index: 4, timestamp_ms: envelope.timestamp };
+            self.progress.insert(envelope.hash, stage);
+        }
+        for envelope in self.stage5.iter() {
+            let stage = Stage { index: 5, timestamp_ms: envelope.timestamp };
+            self.progress.insert(envelope.hash, stage);
+        }
+        db::save(&self.progress, &fs::get_progress_db_path())
+            .expect("error saving database");
     }
 
     /// Returns the number of flashcards currently processed by this automat.

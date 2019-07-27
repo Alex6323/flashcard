@@ -15,7 +15,10 @@ pub struct Display {
     terminal: Terminal,
     cursor: TerminalCursor,
     input: TerminalInput,
+    #[cfg(not(debug_assertions))]
     _alt: AlternateScreen,
+    #[cfg(debug_assertions)]
+    _raw: crossterm::RawScreen,
     width: usize,
     height: usize,
 }
@@ -23,8 +26,11 @@ pub struct Display {
 impl Display {
     /// Creates a new display.
     pub fn new() -> Self {
+        #[cfg(not(debug_assertions))]
         let _alt = AlternateScreen::to_alternate(true)
-            .expect("error creating raw alternate screen");
+            .expect("error creating alternate raw screen");
+        #[cfg(debug_assertions)]
+        let _raw = RawScreen::into_raw_mode().expect("error creating raw screen");
 
         let terminal = crossterm::terminal();
         let cursor = crossterm::cursor();
@@ -36,7 +42,10 @@ impl Display {
             terminal,
             cursor,
             input,
+            #[cfg(not(debug_assertions))]
             _alt,
+            #[cfg(debug_assertions)]
+            _raw,
             width: width as usize,
             height: height as usize,
         }

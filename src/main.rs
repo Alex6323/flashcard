@@ -53,4 +53,6 @@ fn main() {
 
         display.redraw();
     }
+
+    automat.save();
 }
