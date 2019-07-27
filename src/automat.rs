@@ -20,6 +20,9 @@ pub struct Envelope {
     pub timestamp: u64,
 }
 
+/// Represents the current learning progress.
+pub struct Progress(pub usize, pub usize, pub usize, pub usize, pub usize, pub usize);
+
 /// Represents an automat that by some logic deals the flashcards based on the user's
 /// learning progress.
 pub struct Automat {
@@ -195,6 +198,20 @@ impl Automat {
         // only ends if there are no flashcards in the first queue and all
         // other flashcards need to pause
         None
+    }
+
+    /// Returns the current progress.
+    ///
+    /// This measured by simply counting the flashcards of each stage.
+    pub fn progress(&self) -> Progress {
+        Progress(
+            self.stage0.len(),
+            self.stage1.len(),
+            self.stage2.len(),
+            self.stage3.len(),
+            self.stage4.len(),
+            self.stage5.len(),
+        )
     }
 }
 

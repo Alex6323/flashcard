@@ -1,5 +1,7 @@
 //! A display for the terminal.
+use crate::automat::Progress;
 use crate::constants::{APP_NAME, APP_VERSION, HEADER_HEIGHT};
+use crate::constants::{BG_COLOR, FG_COLOR};
 use crate::validator::{HintMode, LineValidator};
 
 use crossterm::RawScreen;
@@ -16,7 +18,7 @@ pub struct Display {
     input: TerminalInput,
     _raw: RawScreen,
     width: usize,
-    _height: usize,
+    height: usize,
 }
 
 impl Display {
@@ -35,35 +37,83 @@ impl Display {
             input,
             _raw,
             width: width as usize,
-            _height: height as usize,
+            height: height as usize,
         }
     }
 
-    /// Clears the complete terminal. Should be called early.
-    pub fn clear(&self) {
-        self.terminal.clear(ClearType::All).expect("error clearing display");
+    /// Initializes the display.
+    pub fn init(&self) {
         self.hide_cursor();
-    }
-
-    /// Clears everything except the header.
-    pub fn clear_except_header(&self) {
+        self.clear();
+        self.print_header();
+        self.print_footer();
         self.cursor.goto(0, HEADER_HEIGHT).expect("error moving cursor");
-        self.terminal.clear(ClearType::FromCursorDown).expect("error clearing display");
     }
 
-    /// Prints useful information about this cardbox.
+    /// Redraws the display.
+    pub fn redraw(&self) {
+        self.clear_input_area();
+        self.cursor.goto(0, HEADER_HEIGHT).expect("error moving cursor");
+    }
+
+    /// Prints the header of this display.
     pub fn print_header(&self) {
-        //
-        let name_version = format!(" {} {}", APP_NAME, APP_VERSION);
-        let name_version_x = self.width as u16 / 2 - name_version.len() as u16 / 2;
+        self.print_bar_top(BG_COLOR, self.width);
+        self.print_title();
+        println!(); // one empty line
+    }
 
-        print_frame_top(self.width);
-        print_frame_mid(self.width);
-        print_frame_mid(self.width);
-        print_frame_mid(self.width);
-        print_frame_bot(self.width);
+    /// Prints the footer of this display.
+    pub fn print_footer(&self) {
+        self.print_bar_bot(BG_COLOR, self.width);
+        self.print_shortcuts();
+    }
 
-        self.cprint_at(name_version, name_version_x, 2, Color::DarkBlue);
+    fn print_bar_top(&self, bg_color: Color, width: usize) {
+        self.cursor.save_position().expect("error saving cursor position");
+        self.cursor.goto(0, 0).expect("error moving cursor");
+        let empty_line = format!("{: <1$}", "", width + 1);
+        println!(
+            "\r{}{}{}",
+            Colored::Bg(bg_color),
+            empty_line,
+            Colored::Bg(Color::Reset)
+        );
+        self.cursor.reset_position().expect("error resetting cusor position");
+    }
+
+    fn print_bar_bot(&self, bg_color: Color, width: usize) {
+        self.cursor.save_position().expect("error saving cursor position");
+        self.cursor.goto(0, self.height as u16).expect("error moving cursor");
+        let empty_line = format!("{: <1$}", "", width + 1);
+        print!("\r{}{}{}", Colored::Bg(bg_color), empty_line, Colored::Bg(Color::Reset));
+        self.cursor.reset_position().expect("error resetting cusor position");
+    }
+
+    fn print_title(&self) {
+        let name_version = format!("{} {}", APP_NAME, APP_VERSION);
+        let x = 1;
+        self.cprint_at(name_version, x, 0, FG_COLOR, BG_COLOR);
+    }
+
+    fn print_shortcuts(&self) {
+        let shortcuts = format!("{} | {}", "CTRL-C: exit program", "CTRL-H: show hint");
+        let x = 1;
+        let y = self.height as u16;
+
+        self.cprint_at(shortcuts, x, y, FG_COLOR, BG_COLOR);
+    }
+
+    /// Prints the progress.
+    pub fn print_progress(&self, progress: Progress) {
+        let stages = format!(
+            "{}|{}|{}|{}|{}|{}",
+            progress.0, progress.1, progress.2, progress.3, progress.4, progress.5
+        );
+        let w = stages.len();
+        let x = self.width as u16 - w as u16;
+
+        self.cprint_at(stages, x, 0, FG_COLOR, BG_COLOR);
     }
 
     /// Reads input from user.
@@ -177,11 +227,25 @@ impl Display {
     }
 
     /// Prints colored text to the terminal at a certain position.
-    pub fn cprint_at(&self, text: impl std::fmt::Display, x: u16, y: u16, color: Color) {
+    pub fn cprint_at(
+        &self,
+        text: impl std::fmt::Display,
+        x: u16,
+        y: u16,
+        fg_color: Color,
+        bg_color: Color,
+    ) {
         let (ox, oy) = self.cursor.pos();
 
         self.cursor.goto(x, y).expect("couldn't move cursor");
-        print!("{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
+        print!(
+            "{}{}{}{}{}",
+            Colored::Bg(bg_color),
+            Colored::Fg(fg_color),
+            text,
+            Colored::Fg(Color::Reset),
+            Colored::Bg(Color::Reset)
+        );
 
         self.cursor.goto(ox, oy).expect("couldn't move cursor");
     }
@@ -221,13 +285,36 @@ impl Display {
         self.cursor.show().expect("error showing cursor");
     }
 
+    /// Clears the complete terminal. Should be called early.
+    fn clear(&self) {
+        self.terminal.clear(ClearType::All).expect("error clearing display");
+    }
+
+    /// Clears everything except the header.
+    fn clear_input_area(&self) {
+        self.cursor.goto(2, HEADER_HEIGHT).expect("error moving cursor");
+        self.clear_until_footer();
+    }
+
+    /// Clears until the footer begins.
+    ///
+    /// This method doesn't clear the footer so it doesn't need to be redrawn.
+    fn clear_until_footer(&self) {
+        let (_, current_y) = self.cursor.pos();
+        self.cursor.save_position().expect("error saving cursor position");
+        self.terminal.clear(ClearType::UntilNewLine).expect("error clearing line");
+        for y in (current_y + 1)..(self.height as u16) {
+            self.cursor.goto(0, y).expect("error moving cursor");
+            self.terminal.clear(ClearType::CurrentLine).expect("error clearing line");
+        }
+        self.cursor.reset_position().expect("error restoring cursor position");
+    }
+
     /// This function is used to remove the hint once the user starts typing again
     fn clear_hint(&self, validator: &mut LineValidator) {
         self.cursor.reset_position().expect("error resetting postion");
 
-        self.terminal
-            .clear(ClearType::UntilNewLine)
-            .expect("error clearing rest of line");
+        self.clear_until_footer();
 
         validator.hint_close();
     }
@@ -255,22 +342,4 @@ impl Drop for Display {
     fn drop(&mut self) {
         self.exit();
     }
-}
-
-fn cprintln_frame(text: &str, color: Color, width: usize) {
-    print!("\r║{}", Colored::Fg(color));
-    print!("{: <1$}", text, width - 1);
-    println!("{}║", Colored::Fg(Color::Reset));
-}
-
-fn print_frame_top(width: usize) {
-    println!("\r╔{:═<1$}╗", "", width - 1);
-}
-
-fn print_frame_mid(width: usize) {
-    println!("\r║{: <1$}║", "", width - 1);
-}
-
-fn print_frame_bot(width: usize) {
-    println!("\r╚{:═<1$}╝", "", width - 1);
 }

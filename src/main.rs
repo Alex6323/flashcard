@@ -4,8 +4,7 @@ fn main() {
     let cli = Cli::new();
 
     let mut display = Display::new();
-    display.clear();
-    display.print_header();
+    display.init();
 
     let mut automat = Automat::new();
     automat.init(cli.filepath());
@@ -13,6 +12,8 @@ fn main() {
     // Process flashcards until they all reached final stage, or their interval isn't up
     // yet
     while let Some((flashcard, current_stage)) = automat.next() {
+        display.print_progress(automat.progress());
+
         // Print the front side of the flash card which usually describes the task
         display.println_cr(format!("{}", &flashcard.face));
 
@@ -47,8 +48,7 @@ fn main() {
         if exit {
             break;
         }
-        display.clear_except_header();
-    }
 
-    display.clear();
+        display.redraw();
+    }
 }

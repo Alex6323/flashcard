@@ -1,6 +1,8 @@
+use crossterm::Color;
+
 pub const APP_NAME: &str = "flashcard";
-pub const APP_VERSION: &str = "v0.1.0";
-pub const HEADER_HEIGHT: u16 = 5;
+pub const APP_VERSION: &str = "0.1.0";
+pub const HEADER_HEIGHT: u16 = 2;
 pub const DB_NAME: &str = "progress.db";
 
 /// Markup indicating the front side of a flashcard.
@@ -39,3 +41,6 @@ pub const STAGE2_COOLDOWN: u64 = 120; // 2min
 pub const STAGE3_COOLDOWN: u64 = 240; // 4min
 pub const STAGE4_COOLDOWN: u64 = 480; // 8min
 pub const STAGE5_COOLDOWN: u64 = 960; //16min
+
+pub const BG_COLOR: Color = Color::Cyan;
+pub const FG_COLOR: Color = Color::Black;
