@@ -33,6 +33,9 @@ pub const ALLOWED_TYPOS_PER_LINE: usize = 3;
 /// Number of hints allowed to successfully answer a flashcard.
 pub const ALLOWED_HINTS_PER_LINE: usize = 0;
 
+/// Number of revealed characters when requiring a hint.
+pub const NUM_REVEALED_CHARS_IN_HINT: usize = 2;
+
 /// Number of flashcards that can be newly added to the 1st queue.
 pub const INITIAL_QUEUE_SIZE: usize = 3;
 

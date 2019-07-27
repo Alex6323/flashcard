@@ -1,5 +1,6 @@
 //! A display for the terminal.
 use crate::automat::Progress;
+use crate::constants::NUM_REVEALED_CHARS_IN_HINT;
 use crate::constants::{APP_NAME, APP_VERSION, HEADER_HEIGHT};
 use crate::constants::{BG_COLOR, FG_COLOR};
 use crate::validator::{HintMode, LineValidator};
@@ -179,8 +180,10 @@ impl Display {
                                 }
                                 _ => (),
                             }
-                            if let Some(c) = validator.hint() {
-                                self.cprint(c, Color::Yellow);
+                            for _ in 0..NUM_REVEALED_CHARS_IN_HINT {
+                                if let Some(c) = validator.hint() {
+                                    self.cprint(c, Color::Yellow);
+                                }
                             }
                         }
                         _ => (),
