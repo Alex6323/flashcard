@@ -22,4 +22,5 @@ pub mod prelude {
     pub use super::display::Display;
     pub use super::flashcard::FlashCard;
     pub use super::validator::{LineValidator, ListValidator};
+    pub use crossterm::Color;
 }

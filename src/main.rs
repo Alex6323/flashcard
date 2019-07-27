@@ -31,21 +31,21 @@ fn main() {
 
         // Optionally print additional notes
         if let Some(note) = &flashcard.note {
-            display.println_cr(format!("NOTE: {}", note));
+            display.cprintln_cr(format!("({})\n", note), Color::Yellow);
         }
 
         // If the back of the flashcard was entered correctly, increase its stage,
         // otherwise reset its stage
         if list_v.has_passed() {
             automat.increase_stage(current_stage);
-            display.println_cr("Level up");
+            display.print_passed();
         } else {
             automat.reset_stage(current_stage);
-            display.println_cr("Level reset");
+            display.print_failed()
         }
 
         display.println_cr("");
-        display.println_cr("<PRESS ENTER>");
+        //display.println_cr("<PRESS ENTER>");
         let exit = display.wait_for_return();
         if exit {
             break 'outer;

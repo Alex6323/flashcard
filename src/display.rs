@@ -70,6 +70,20 @@ impl Display {
         self.print_shortcuts();
     }
 
+    /// Prints a notification that the flashcard has been correctly answered.
+    pub fn print_passed(&self) {
+        let x = 1;
+        let y = self.height as u16 - 1;
+        self.cprint_at("Passed", x, y, Color::Green, Color::Reset);
+    }
+
+    /// Prints a notification that the flashcard has been correctly answered.
+    pub fn print_failed(&self) {
+        let x = 1;
+        let y = self.height as u16 - 1;
+        self.cprint_at("Failed", x, y, Color::Red, Color::Reset);
+    }
+
     fn print_bar_top(&self, bg_color: Color, width: usize) {
         self.cursor.save_position().expect("error saving cursor position");
         self.cursor.goto(0, 0).expect("error moving cursor");
@@ -98,7 +112,10 @@ impl Display {
     }
 
     fn print_shortcuts(&self) {
-        let shortcuts = format!("{} | {}", "CTRL-C: exit program", "CTRL-H: show hint");
+        let shortcuts = format!(
+            "{} | {} | {}",
+            "RETURN: next", "CTRL-C: exit program", "CTRL-H: show hint"
+        );
         let x = 1;
         let y = self.height as u16;
 
@@ -223,6 +240,12 @@ impl Display {
     /// return.
     pub fn cprint_cr(&self, text: impl std::fmt::Display, color: Color) {
         print!("\r{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
+    }
+
+    /// Prints colored text to the terminal without newline character after carriage
+    /// return.
+    pub fn cprintln_cr(&self, text: impl std::fmt::Display, color: Color) {
+        println!("\r{}{}{}", Colored::Fg(color), text, Colored::Fg(Color::Reset));
     }
 
     /// Prints text to the terminal with a newline character after carriage return.
