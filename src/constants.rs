@@ -40,10 +40,22 @@ pub const NUM_REVEALED_CHARS_IN_HINT: usize = 2;
 pub const INITIAL_QUEUE_SIZE: usize = 3;
 
 pub const STAGE1_COOLDOWN: u64 = 0;
+#[cfg(debug_assertions)]
 pub const STAGE2_COOLDOWN: u64 = 120; // 2min
+#[cfg(not(debug_assertions))]
+pub const STAGE2_COOLDOWN: u64 = 3600; // 1h
+#[cfg(debug_assertions)]
 pub const STAGE3_COOLDOWN: u64 = 240; // 4min
+#[cfg(not(debug_assertions))]
+pub const STAGE3_COOLDOWN: u64 = 21600; // 6h
+#[cfg(debug_assertions)]
 pub const STAGE4_COOLDOWN: u64 = 480; // 8min
-pub const STAGE5_COOLDOWN: u64 = 960; //16min
+#[cfg(not(debug_assertions))]
+pub const STAGE4_COOLDOWN: u64 = 86400; // 24h
+#[cfg(debug_assertions)]
+pub const STAGE5_COOLDOWN: u64 = 960; // 16min
+#[cfg(not(debug_assertions))]
+pub const STAGE5_COOLDOWN: u64 = 604800; // 1w
 
 pub const BG_COLOR: Color = Color::Cyan;
 pub const FG_COLOR: Color = Color::Black;
