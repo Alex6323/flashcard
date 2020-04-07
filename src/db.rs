@@ -8,14 +8,16 @@ use std::path::Path;
 
 /// Represents a stage that a flashcard can be in.
 #[derive(Debug)]
-pub struct Stage {
+pub struct Stage
+{
     pub index: u64,
     pub timestamp_ms: u64,
 }
 
 /// Loads the DB into a hashmap of flashcard hashes, and their respective stages and
 /// timestamps when they entered a certain stage.
-pub fn load(fname: &str) -> HashMap<u64, Stage> {
+pub fn load(fname: &str) -> HashMap<u64, Stage>
+{
     let path = if cfg!(debug_assertions) {
         Path::new("./sample_db.txt")
     } else {
@@ -52,12 +54,13 @@ pub fn load(fname: &str) -> HashMap<u64, Stage> {
 }
 
 /// Saves the progress DB as a file.
-pub fn save(db: &HashMap<u64, Stage>, fname: &str) -> std::io::Result<()> {
-    let path = if cfg!(debug_assertions) {
-        Path::new("./sample_db.txt")
-    } else {
-        Path::new(fname)
-    };
+pub fn save(db: &HashMap<u64, Stage>, fname: &str) -> std::io::Result<()>
+{
+    // do not save to the database in debug builds (otherwise future unit tests may fail)
+    if cfg!(debug_assertions) {
+        return Ok(());
+    }
+    let path = Path::new(fname);
     let file = File::create(&path).expect("error creating db");
     let mut buffered = BufWriter::new(file);
 
@@ -73,7 +76,8 @@ pub fn save(db: &HashMap<u64, Stage>, fname: &str) -> std::io::Result<()> {
 ///
 /// This function is useful to remove dead flashcards (are created when removed from a
 /// cardbox or after hash changing modifactions happend)
-pub fn clean(fname: &str, older_than: u64) {
+pub fn clean(fname: &str, older_than: u64)
+{
     let mut db = load(fname);
     let mut new_db = HashMap::new();
 
@@ -87,13 +91,15 @@ pub fn clean(fname: &str, older_than: u64) {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests
+{
     use super::super::common::time;
     use super::*;
 
     // TODO: use different file
     //#[test]
-    fn load_and_save_db_with_updated_stage() {
+    fn load_and_save_db_with_updated_stage()
+    {
         let mut db = load("./sample_db.txt");
         assert_eq!(20, db.len());
 

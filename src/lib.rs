@@ -3,24 +3,24 @@
 
 #![deny(missing_docs, bad_style, unsafe_code)]
 
+mod cardbox_parser;
 mod cli;
 mod common;
 mod constants;
 mod db;
-mod parser;
-mod validator;
 
-pub mod automat;
+pub mod cardbox;
 pub mod display;
-pub mod flashcard;
+pub mod flashcards;
+pub mod validator;
 
 /// Re-export of commonly used types.
-pub mod prelude {
-    pub use super::automat::{Automat, Envelope};
+pub mod prelude
+{
+    pub use super::cardbox::{Cardbox, Envelope};
     pub use super::cli::Cli;
-    pub use super::constants::PROMPT_INPUT;
     pub use super::display::Display;
-    pub use super::flashcard::FlashCard;
-    pub use super::validator::{LineValidator, ListValidator};
+    pub use super::flashcards::Flashcard;
+    pub use super::validator::{FlashcardValidator, InputValidator};
     pub use crossterm::Color;
 }

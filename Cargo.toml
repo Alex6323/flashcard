@@ -13,6 +13,7 @@ structopt = "0.2.18"
 twox-hash = "1.4.2"
 iota-lib-rs = "0.3.0"
 dirs = "2.0.1"
+nom = "5.0.0"
 
 [lib]
 name = "flashcard"

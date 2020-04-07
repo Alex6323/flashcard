@@ -3,7 +3,8 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Returns the unix time.
-pub fn get_unix_time_millis() -> u64 {
+pub fn get_unix_time_millis() -> u64
+{
     let unix_time = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .expect("error determining system time");

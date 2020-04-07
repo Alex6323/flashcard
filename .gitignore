@@ -1,5 +1,5 @@
 /target
 **/*.rs.bk
 Cargo.lock
-sample_db.txt
-sample_db2.txt
+sample_*.txt
+todos.txt

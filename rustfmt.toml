@@ -5,3 +5,4 @@ wrap_comments = true
 comment_width = 90
 edition = "2018"
 error_on_line_overflow = true
+brace_style = "AlwaysNextLine"

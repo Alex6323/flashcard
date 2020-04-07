@@ -1,19 +1,21 @@
-//! Module that hosts the automat responsible for flashcard selection.
+//! Module that hosts the cardbox responsible for flashcard selection.
 
+use crate::cardbox_parser;
 use crate::common::fs;
 use crate::common::time;
-use crate::constants::{DB_NAME, INITIAL_QUEUE_SIZE};
+use crate::constants::INITIAL_QUEUE_SIZE;
 use crate::db::{self, Stage};
-use crate::flashcard::FlashCard;
-use crate::parser;
+use crate::display::Display;
+use crate::flashcards::Flashcard;
 
 use std::collections::{HashMap, VecDeque};
 
 /// Represents a flashcard with additional metadata.
 #[derive(Debug)]
-pub struct Envelope {
+pub struct Envelope
+{
     /// A pointer to the associated flashcard.
-    pub flashcard: FlashCard,
+    pub flashcard: Flashcard,
     /// The hash of the flashcard.
     pub hash: u64,
     /// The time the flashcard entered its current stage (Unix time in milliseconds).
@@ -23,10 +25,11 @@ pub struct Envelope {
 /// Represents the current learning progress.
 pub struct Progress(pub usize, pub usize, pub usize, pub usize, pub usize, pub usize);
 
-/// Represents an automat that by some logic deals the flashcards based on the user's
+/// Represents a cardbox that by some logic deals the flashcards based on the user's
 /// learning progress.
-pub struct Automat {
-    stage0: VecDeque<FlashCard>,
+pub struct Cardbox
+{
+    stage0: VecDeque<Flashcard>,
     stage1: VecDeque<Envelope>,
     stage2: VecDeque<Envelope>,
     stage3: VecDeque<Envelope>,
@@ -35,9 +38,11 @@ pub struct Automat {
     progress: HashMap<u64, Stage>,
 }
 
-impl Automat {
-    /// Creates a new flashcard automat.
-    pub fn new() -> Self {
+impl Cardbox
+{
+    /// Creates a new flashcard cardbox.
+    pub fn new() -> Self
+    {
         Self {
             stage0: VecDeque::new(),
             stage1: VecDeque::new(),
@@ -49,12 +54,13 @@ impl Automat {
         }
     }
 
-    /// Tries to put the flashcard into the automat.
+    /// Tries to put the flashcard into the cardbox.
     ///
     /// This will only succeed, if the card was previously taken from the cardbox and put
-    /// into the automat.
-    pub fn init(&mut self, path: &str) {
-        let flashcards = parser::parse(path);
+    /// into the cardbox.
+    pub fn init(&mut self, path: &str)
+    {
+        let flashcards = cardbox_parser::parse_from_file(path);
         // Fill all stages according to the progress database
         for flashcard in flashcards.into_iter() {
             let hash = flashcard.get_hash();
@@ -87,7 +93,8 @@ impl Automat {
     }
 
     /// Increases the stage of the flashcard.
-    pub fn increase_stage(&mut self, current_stage: usize) {
+    pub fn increase_stage(&mut self, current_stage: usize)
+    {
         match current_stage {
             5 => {
                 // let flashcards stay in the last stage forever
@@ -129,7 +136,8 @@ impl Automat {
     }
 
     /// Resets the stage of the flashcard.
-    pub fn reset_stage(&mut self, current_stage: usize) {
+    pub fn reset_stage(&mut self, current_stage: usize)
+    {
         let mut envelope = match current_stage {
             5 => self.stage5.pop_front().unwrap(),
             4 => self.stage4.pop_front().unwrap(),
@@ -143,7 +151,8 @@ impl Automat {
     }
 
     /// Saves the progress to the internal key-value store.
-    pub fn save(&mut self) {
+    pub fn save(&mut self)
+    {
         for envelope in self.stage1.iter() {
             let stage = Stage { index: 1, timestamp_ms: envelope.timestamp };
             self.progress.insert(envelope.hash, stage);
@@ -168,8 +177,9 @@ impl Automat {
             .expect("error saving database");
     }
 
-    /// Returns the number of flashcards currently processed by this automat.
-    pub fn size(&self) -> usize {
+    /// Returns the number of flashcards currently being actively processed.
+    pub fn num_active(&self) -> usize
+    {
         self.stage1.len()
             + self.stage2.len()
             + self.stage3.len()
@@ -177,8 +187,20 @@ impl Automat {
             + self.stage5.len()
     }
 
+    /// Returns the number of all flashcards in the cardbox.
+    pub fn size(&self) -> usize
+    {
+        self.stage0.len()
+            + self.stage1.len()
+            + self.stage2.len()
+            + self.stage3.len()
+            + self.stage4.len()
+            + self.stage5.len()
+    }
+
     /// Returns the next flashcard and its current stage.
-    pub fn next(&self) -> Option<(&FlashCard, usize)> {
+    pub fn next(&self) -> Option<(&Flashcard, usize)>
+    {
         use crate::constants::STAGE1_COOLDOWN;
         use crate::constants::STAGE2_COOLDOWN;
         use crate::constants::STAGE3_COOLDOWN;
@@ -224,7 +246,9 @@ impl Automat {
     /// Returns the current progress.
     ///
     /// This measured by simply counting the flashcards of each stage.
-    pub fn progress(&self) -> Progress {
+    /// TODO: remove this methods.
+    pub fn progress(&self) -> Progress
+    {
         Progress(
             self.stage0.len(),
             self.stage1.len(),
@@ -234,30 +258,40 @@ impl Automat {
             self.stage5.len(),
         )
     }
+
+    /// Displays the current progress.
+    pub fn display_progress(&self, display: &mut Display)
+    {
+        unimplemented!()
+    }
 }
 
 #[cfg(test)]
-mod tests {
+mod tests
+{
     use super::*;
 
     #[test]
-    fn new_automat() {
-        let mut automat = Automat::new();
-        assert_eq!(0, automat.stage0.len());
-        assert_eq!(0, automat.stage1.len());
+    fn new_cardbox()
+    {
+        let cardbox = Cardbox::new();
+        assert_eq!(0, cardbox.stage0.len());
+        assert_eq!(0, cardbox.stage1.len());
     }
 
     #[test]
-    fn init_automat() {
-        let mut automat = Automat::new();
+    fn init_cardbox()
+    {
+        let mut cardbox = Cardbox::new();
 
-        automat.init("./sample_box.txt");
-        assert_eq!(20, automat.size());
-        assert_eq!(11, automat.stage0.len());
-        assert_eq!(10, automat.stage1.len());
-        assert_eq!(2, automat.stage2.len());
-        assert_eq!(4, automat.stage3.len());
-        assert_eq!(3, automat.stage4.len());
-        assert_eq!(1, automat.stage5.len());
+        cardbox.init("./sample_box.txt");
+        assert_eq!(32, cardbox.size());
+        assert_eq!(20, cardbox.num_active());
+        assert_eq!(12, cardbox.stage0.len());
+        assert_eq!(10, cardbox.stage1.len());
+        assert_eq!(2, cardbox.stage2.len());
+        assert_eq!(4, cardbox.stage3.len());
+        assert_eq!(3, cardbox.stage4.len());
+        assert_eq!(1, cardbox.stage5.len());
     }
 }
